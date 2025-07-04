@@ -12,7 +12,7 @@ export function Home(): React.JSX.Element {
       <div className="flex justify-center items-center relative px-4">
         <span className="py-10 font-mono text-2xl">lotus</span>
         <div className=" absolute right-4 flex gap-2 p-3 pl-7px">
-          <Link to="/" className="font-mono [&.active]:text-teal-500">
+          <Link to="/home" className="font-mono [&.active]:text-teal-500">
             {" "}
             Home
           </Link>
