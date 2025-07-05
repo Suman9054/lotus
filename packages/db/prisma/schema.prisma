@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
   output   = "../generated/prisma"
 }
 
@@ -16,15 +15,35 @@ datasource db {
 }
 
 
-model User{
-  Id       Int   @id @default(autoincrement()) 
-  Name     String
-  Email    String @unique
-  Password String
-  rooms    Rooms[] @relation("UserRooms")
-  online   Boolean @default(false)
+model User {
+  Id        Int      @id @default(autoincrement())
+  Name      String
+  User_name String   @unique
+  Email     String   @unique
+  Password  String
+  online    Boolean  @default(false)
 
-  Messages Messages[]
+  rooms     Rooms[]  @relation("UserRooms")
+  Messages  Messages[]
+
+  contacts     UserContacts[] 
+  
+
+ 
+
+  
+  @@unique([Id, User_name])
+}
+
+model UserContacts {
+  UserId    Int
+  ContactId Int
+  User_name     String
+
+  User      User @relation(fields: [UserId,User_name], references: [Id,User_name])
+  
+
+  @@id([UserId, ContactId])
 }
 
 model Rooms{

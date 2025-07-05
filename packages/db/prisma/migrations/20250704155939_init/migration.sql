@@ -2,8 +2,20 @@
 CREATE TABLE "User" (
     "Id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "Name" TEXT NOT NULL,
+    "User_name" TEXT NOT NULL,
     "Email" TEXT NOT NULL,
-    "Password" TEXT NOT NULL
+    "Password" TEXT NOT NULL,
+    "online" BOOLEAN NOT NULL DEFAULT false
+);
+
+-- CreateTable
+CREATE TABLE "UserContacts" (
+    "UserId" INTEGER NOT NULL,
+    "ContactId" INTEGER NOT NULL,
+    "User_name" TEXT NOT NULL,
+
+    PRIMARY KEY ("UserId", "ContactId"),
+    CONSTRAINT "UserContacts_UserId_User_name_fkey" FOREIGN KEY ("UserId", "User_name") REFERENCES "User" ("Id", "User_name") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -36,7 +48,13 @@ CREATE TABLE "_UserRooms" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_User_name_key" ON "User"("User_name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_Email_key" ON "User"("Email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_Id_User_name_key" ON "User"("Id", "User_name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_UserRooms_AB_unique" ON "_UserRooms"("A", "B");
