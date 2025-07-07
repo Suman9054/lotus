@@ -1,38 +1,35 @@
-import { Elysia, status,t } from 'elysia';
-import prisma from "@repo/db/Prisma"
-
+import { Elysia, status, t } from "elysia";
+import { prisma_client } from "../../../db/db";
 
 const contacts_rout = new Elysia({
-    prefix: '/v1/api'});
+  prefix: "/v1/api",
+});
 
-contacts_rout.get('/contact',async (ctx) => {
-   const id = ctx.query.id;
-    console.log(Number(id));
+contacts_rout.get("/contact", async (ctx) => {
+  const id:string|undefined = ctx.query.id;
+  console.log(Number(id));
   if (!id) {
     return status(400, "Id is required");
   }
-   const user = await prisma.user.findUnique({where: { Id: Number(id) }});
-  if (!user) {
-    return status(404, "User not found");
-  }
-   const contects = await prisma.userContacts.findMany({
-    where: { UserId: user.Id },
-  })
+  
+  const contects = prisma_client.find_contacts(Number(id));
   if (!contects) {
     return status(404, "Contacts not found");
   }
 
-    
-   
- return status(200, contects);
+  return status(200, contects);
 });
 
-contacts_rout.post('/contact', (ctx) => {
-    const email = ctx.query.email;
-   
-    
-    return status(200, "OK");
+contacts_rout.post("/contact/creat", (ctx) => {
+  const user_name:string|undefined = ctx.query.user_name;
+  const userId:string|undefined = ctx.query.userId;
+ if (!user_name || !userId) {
+    return status(400, "User name and User ID are required");
+  }
+  prisma_client.create_contact(user_name, Number(userId)).then(()=>{
+    return status(201, "Contact created successfully");
+  })
+  
 });
-
 
 export default contacts_rout;
