@@ -23,7 +23,7 @@ model User {
   Password  String
   online    Boolean  @default(false)
 
-  rooms     Rooms[]  @relation("UserRooms")
+  rooms     Rooms[]  
   Messages  Messages[]
 
   contacts     UserContacts[] 
@@ -36,6 +36,7 @@ model User {
 }
 
 model UserContacts {
+  Id    Int     @id @default(autoincrement())
   UserId    Int
   ContactId Int
   User_name     String
@@ -43,16 +44,17 @@ model UserContacts {
   User      User @relation(fields: [UserId,User_name], references: [Id,User_name])
   
 
-  @@id([UserId, ContactId])
+ 
 }
 
 model Rooms{
   Id          Int      @id @default(autoincrement())
   Name        String
+  user_Id    Int        
   Description String?
   CreatedAt   DateTime @default(now())
   UpdatedAt   DateTime @updatedAt
-  Users       User[]   @relation("UserRooms")
+  Users       User   @relation( fields: [user_Id],references: [Id])
 
   Messages Messages[]
 }
