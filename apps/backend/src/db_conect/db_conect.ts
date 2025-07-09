@@ -40,6 +40,7 @@ export default class dbconect {
     hash: string,
     email: string,
     user_name: string,
+    avatar: string 
   ) {
     try {
       await this.client.user.create({
@@ -48,6 +49,7 @@ export default class dbconect {
           User_name: user_name,
           Email: email,
           Password: hash,
+          avatar: avatar,
         },
       });
     } catch (e: any) {
@@ -68,13 +70,28 @@ export default class dbconect {
         data: {
           UserId: userId,
           ContactId: user.Id,
-          User_name: user_name,
+          
         },
       });
     } catch (e: any) {
       console.log(e);
     }
   }
-
-  
+  async create_room(
+    room_name: string,
+    Description:string
+  ) {
+    try {
+      const room = await this.client.rooms.create({
+        data: {
+          Name: room_name,
+          Description: Description,
+          
+        },
+      });
+      return room;
+    } catch (e: any) {
+      console.log(e);
+    }
+  }
 }
