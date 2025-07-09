@@ -22,43 +22,57 @@ model User {
   Email     String   @unique
   Password  String
   online    Boolean  @default(false)
-
-  rooms     Rooms[]  
+  avatar    String 
+  
+  rooms     UserRooms[]  
   Messages  Messages[]
 
-  contacts     UserContacts[] 
   
-
- 
-
+  contactsAdded     UserContacts[] @relation("ContactAdded")
   
-  @@unique([Id, User_name])
+  contactsOf        UserContacts[] @relation("UserContacts")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UserContacts {
-  Id    Int     @id @default(autoincrement())
-  UserId    Int
-  ContactId Int
-  User_name     String
-
-  User      User @relation(fields: [UserId,User_name], references: [Id,User_name])
+  Id        Int     @id @default(autoincrement())
+  UserId    Int     
+  ContactId Int     
   
-
- 
+  User      User    @relation("UserContacts", fields: [UserId], references: [Id])
+  Contact   User    @relation("ContactAdded", fields: [ContactId], references: [Id])
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([UserId, ContactId])
 }
 
-model Rooms{
+model Rooms {
   Id          Int      @id @default(autoincrement())
   Name        String
-  user_Id    Int        
   Description String?
   CreatedAt   DateTime @default(now())
   UpdatedAt   DateTime @updatedAt
-  Users       User   @relation( fields: [user_Id],references: [Id])
-
-  Messages Messages[]
+  
+  
+  Users       UserRooms[]
+  Messages    Messages[]
 }
 
+model UserRooms {
+  Id     Int @id @default(autoincrement())
+  UserId Int
+  RoomId Int
+  
+  User   User  @relation(fields: [UserId], references: [Id])
+  Room   Rooms @relation(fields: [RoomId], references: [Id])
+  
+  joinedAt DateTime @default(now())
+  
+  @@unique([UserId, RoomId])
+}
 
 model Messages {
   Id        Int      @id @default(autoincrement())
@@ -68,6 +82,8 @@ model Messages {
   CreatedAt DateTime @default(now())
   UpdatedAt DateTime @updatedAt
 
-  Room      Rooms    @relation(fields: [RoomId], references: [Id])
+  Room      Rooms    @relation(fields: [RoomId], references: [Id], onDelete: Cascade)
   User      User     @relation(fields: [UserId], references: [Id])
+  
+  @@index([RoomId, CreatedAt])
 }
