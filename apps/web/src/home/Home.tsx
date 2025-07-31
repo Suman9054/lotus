@@ -16,6 +16,10 @@ export function Home(): React.JSX.Element {
             {" "}
             Home
           </Link>
+          <Link to="/chat" className="font-mono [&.active]:text-teal-500">
+            {" "}
+            Chat
+          </Link>
         </div>
       </div>
       <Outlet />

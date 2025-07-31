@@ -1,7 +1,20 @@
-import { Elysia } from "elysia";
+const server = Bun.serve<{ authToken: string }, {}>({
+  port: 4000,
+  fetch(req, server) {
+    const success = server.upgrade(req);
+    if (success) {
+      // Bun automatically returns a 101 Switching Protocols
 
-const app = new Elysia();
-
-app.listen(3000, () => {
-  console.log("Server is running on http://localhost:3000");
+      return undefined;
+    }
+  },
+  websocket: {
+    open(ws) {
+      console.log("WebSocket opened");
+      ws.send("Welcome to the WebSocket server!");
+    },
+    message(ws, message) {},
+  },
 });
+
+console.log(`Listening on ${server.hostname}:${server.port}`);

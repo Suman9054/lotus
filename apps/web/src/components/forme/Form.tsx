@@ -2,7 +2,7 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import Input from "../input/Input";
 import Button_submit from "../submit_button/Submit_button";
 import Switch from "../switch/Switch";
-import type { RoomData } from "@repo/zodscema/RoomData";
+
 const { fieldContext, formContext } = createFormHookContexts();
 
 const { useAppForm } = createFormHook({

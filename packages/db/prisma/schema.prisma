@@ -14,63 +14,125 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/*───────────────────────────*
+ |  CORE MODELS FOR BETTER AUTH |
+ *───────────────────────────*/
 
 model User {
-  Id        Int      @id @default(autoincrement())
-  Name      String
-  User_name String   @unique
-  Email     String   @unique
-  Password  String
-  online    Boolean  @default(false)
-  avatar    String 
-  
-  rooms     UserRooms[]  
-  Messages  Messages[]
+  /// Primary key (Better Auth maps this to `id`)
+  Id          Int      @id @default(autoincrement())
 
+  /// Standard Better Auth columns — we *map* them to keep your names
+  Name        String   @map("name")        // maps to `name`
+  Email       String   @unique @map("email")
+  avatar      String?  @map("image")       // fulfils `image`
+  online      Boolean  @default(false)
+  user_name   String  @unique @map("user_name") 
+  /// Relations
+  rooms       UserRooms[] 
+  Messages    Messages[]
+  contactsAdded UserContacts[] @relation("ContactAdded")
+  contactsOf    UserContacts[] @relation("UserContacts")
+  sessions      Session[]
+  accounts      Account[]      
   
-  contactsAdded     UserContacts[] @relation("ContactAdded")
-  
-  contactsOf        UserContacts[] @relation("UserContacts")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([Id, Name])
+  @@map("user")         
 }
 
+model Session {
+  Id         Int      @id @default(autoincrement())              @map("id")
+  UserId     Int                                           @map("userId")
+  Token      String   @unique                              @map("token")
+  ExpiresAt  DateTime                                     @map("expiresAt")
+
+  ipAddress  String?                                      @map("ipAddress")
+  userAgent  String?                                      @map("userAgent")
+
+  User       User     @relation(fields: [UserId], references: [Id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([UserId, Token])
+  @@map("session")
+}
+
+
+
+model Account {
+  Id                Int      @id @default(autoincrement())
+  UserId            Int
+  providerId        String   // e.g. "emailandpassword", "github"
+  providerAccountId String?  // UID from the provider
+  hashedPassword    String?  // set automatically for e-mail/password flow
+  refreshToken      String?
+  accessToken       String?
+  accessTokenExpires DateTime?
+
+  User              User     @relation(fields: [UserId], references: [Id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([providerId, providerAccountId])
+  @@map("account")
+}
+
+
+
+model VerificationToken {
+  Id         Int      @id @default(autoincrement())
+  token      String   @unique
+  identifier String   // e-mail or phone number
+  type       String   // "emailVerification" | "passwordReset" | …
+  expiresAt  DateTime
+
+  createdAt  DateTime @default(now())
+  @@map("verification_token")
+}
+
+
+
 model UserContacts {
-  Id        Int     @id @default(autoincrement())
-  UserId    Int     
-  ContactId Int     
-  
-  User      User    @relation("UserContacts", fields: [UserId], references: [Id])
-  Contact   User    @relation("ContactAdded", fields: [ContactId], references: [Id])
-  
-  createdAt DateTime @default(now())
-  
-  @@unique([UserId, ContactId])
+  Id          Int     @id @default(autoincrement())
+  UserId      Int
+  ContactId   Int
+  contectName String
+
+  User        User    @relation("UserContacts",  fields: [UserId],   references: [Id])
+  Contact     User    @relation("ContactAdded", fields: [ContactId], references: [Id])
+
+  createdAt   DateTime @default(now())
+
+  @@unique([UserId, ContactId, contectName])
 }
 
 model Rooms {
-  Id          Int      @id @default(autoincrement())
+  Id          Int        @id @default(autoincrement())
   Name        String
   Description String?
-  CreatedAt   DateTime @default(now())
-  UpdatedAt   DateTime @updatedAt
-  
-  
+  CreatedAt   DateTime   @default(now())
+  UpdatedAt   DateTime   @updatedAt
+
   Users       UserRooms[]
   Messages    Messages[]
 }
 
 model UserRooms {
-  Id     Int @id @default(autoincrement())
-  UserId Int
-  RoomId Int
-  
-  User   User  @relation(fields: [UserId], references: [Id])
-  Room   Rooms @relation(fields: [RoomId], references: [Id])
-  
+  Id       Int   @id @default(autoincrement())
+  UserId   Int
+  RoomId   Int
+
+  User     User  @relation(fields: [UserId], references: [Id])
+  Room     Rooms @relation(fields: [RoomId], references: [Id])
+
   joinedAt DateTime @default(now())
-  
+
   @@unique([UserId, RoomId])
 }
 
@@ -84,6 +146,6 @@ model Messages {
 
   Room      Rooms    @relation(fields: [RoomId], references: [Id], onDelete: Cascade)
   User      User     @relation(fields: [UserId], references: [Id])
-  
+
   @@index([RoomId, CreatedAt])
 }

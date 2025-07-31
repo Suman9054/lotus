@@ -11,6 +11,8 @@ import {
 import { Home_c } from "./components/Home_c/Home_c";
 import { Room } from "./room/Room";
 import AiVideoLanding from "./Landing/Landin_page";
+import Authlayout from "./auth/authlayout/authlayout";
+import LoginForm from "./auth/Login/Login";
 
 const rootRoute = createRootRoute({});
 
@@ -34,9 +36,20 @@ const indexRoute = createRoute({
 
 const RoomRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/room/$",
+  path: "/chat",
   component: Room,
 });
+const authroute = createRoute({
+  getParentRoute: () => rootRoute,  
+   path: "/auth",
+   component: Authlayout
+});
+const LoginRoute = createRoute({
+  getParentRoute: () => authroute,
+  path: "/",
+  component:LoginForm
+});
+
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -47,6 +60,7 @@ const routeTree = rootRoute.addChildren([
   LandimgRoute,
   HomeRoute.addChildren([indexRoute]),
   RoomRoute,
+  authroute.addChildren([LoginRoute]),
 ]);
 
 const router = createRouter({ routeTree });
